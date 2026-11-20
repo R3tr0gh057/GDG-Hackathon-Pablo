@@ -81,24 +81,43 @@ def _prepare_audio(source: Path, folder: Path) -> Path:
     return source
 
 
+
 def _transcribe(path: Path) -> tuple[str, str]:
     global _MODEL, _MODEL_NAME
+    import logging
     import os
 
     from faster_whisper import WhisperModel
 
     name = os.getenv("WHISPER_MODEL", "base")
-    if _MODEL is None or _MODEL_NAME != name:
-        # int8 keeps the model usable on ordinary CPUs. Loaded once per process.
-        _MODEL = WhisperModel(name, device="cpu", compute_type="int8")
-        _MODEL_NAME = name
+
     try:
-        segments, info = _MODEL.transcribe(str(path), vad_filter=True)
+        if _MODEL is None or _MODEL_NAME != name:
+            logging.info("Loading Faster-Whisper model: %s", name)
+            _MODEL = WhisperModel(name, device="cpu", compute_type="int8")
+            _MODEL_NAME = name
+
+        logging.info("Starting transcription: %s", path)
+        logging.info("Audio file size: %s bytes", path.stat().st_size)
+
+        segments, info = _MODEL.transcribe(
+            str(path),
+            vad_filter=True
+        )
+
         text = " ".join(segment.text.strip() for segment in segments).strip()
+
+        language = getattr(info, "language", None) or "unknown"
+
+        logging.info("Transcription completed. Language: %s", language)
+
+        return text, language
+
     except Exception as exc:
+        logging.exception("FASTER-WHISPER TRANSCRIPTION ERROR")
+
         raise AudioError(
-            "The recording could not be transcribed. If this is not a WAV file, install FFmpeg and try again.",
-            400,
+            "Transcription failed. Check the Flask terminal for the technical error.",
+            500,
         ) from exc
-    language = getattr(info, "language", None) or "unknown"
-    return text, language
+
