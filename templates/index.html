@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Harbor — Think it's a scam?</title>
+  <link rel="icon" href="{{ url_for('static', filename='assets/logo.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <a class="skip" href="#composer">Skip to message</a>
+  <header class="top">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='assets/logo.svg') }}" alt="" width="36" height="36">
+      <div>
+        <p class="brand-name">Harbor</p>
+        <p class="brand-sub">Local scam check</p>
+      </div>
+    </div>
+    <div class="status-row" aria-live="polite">
+      <span class="pill" id="ai-status">Local AI: checking</span>
+      <span class="pill" id="api-status">API: checking</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Think it's a scam? Let's find out.</h1>
+      <p>Analyze suspicious messages and voice recordings with local AI.</p>
+    </section>
+
+    <section class="card" id="composer">
+      <div id="text-panel">
+        <label for="message">Suspicious message</label>
+        <textarea id="message" rows="8" maxlength="20000" placeholder="Paste a text, email, or chat here. Include the link or payment request if there is one."></textarea>
+      </div>
+
+      <div id="voice-panel" class="voice" hidden>
+        <div class="voice-controls">
+          <button type="button" class="btn secondary" id="record-btn">Record</button>
+          <label class="btn secondary file-btn">
+            Upload audio
+            <input id="audio-file" type="file" accept="audio/*,.wav,.mp3,.m4a,.webm,.ogg,.flac">
+          </label>
+          <span id="timer" class="timer">00:00</span>
+          <span id="rec-dot" class="dot" hidden>Recording</span>
+        </div>
+        <p id="file-name" class="hint"></p>
+        <audio id="playback" controls hidden></audio>
+        <label for="transcript">Transcript — edit anything that looks wrong</label>
+        <textarea id="transcript" rows="5" placeholder="The transcript will appear here after you record or upload."></textarea>
+        <button type="button" class="btn secondary" id="transcribe-btn">Transcribe</button>
+      </div>
+
+      <div class="mode-bar" role="group" aria-label="Input type">
+        <button type="button" class="mode active" id="mode-text" aria-pressed="true">Text / Transcript</button>
+        <button type="button" class="mode" id="mode-voice" aria-pressed="false">Voice Recording</button>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn primary" id="analyze-btn">Analyze</button>
+        <button type="button" class="btn ghost" id="clear-btn">Clear</button>
+      </div>
+      <p class="privacy">Your message stays on this computer. Harbor sends it only to the local Ollama model ({{ model }}).</p>
+    </section>
+
+    <section class="card progress" id="progress" hidden aria-live="polite">
+      <p id="progress-label">Working</p>
+    </section>
+
+    <section class="results" id="results" hidden></section>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
